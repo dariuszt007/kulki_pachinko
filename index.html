@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>🎰 スロットマシン</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial,sans-serif;
+
+    background:linear-gradient(
+    180deg,
+    #ff1493,
+    #7b1fff,
+    #002244);
+
+    min-height:100vh;
+
+    padding:15px;
+
+    color:white;
+}
+
+.wrapper{
+    width:100%;
+    max-width:900px;
+    margin:auto;
+}
+
+.machine{
+
+    background:rgba(0,0,0,0.4);
+
+    border:4px solid gold;
+
+    border-radius:20px;
+
+    padding:20px;
+}
+
+h1{
+
+    text-align:center;
+
+    color:gold;
+
+    margin-bottom:20px;
+
+    font-size:clamp(28px,5vw,50px);
+}
+
+.row{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(180px,1fr));
+
+    gap:12px;
+
+    margin-bottom:15px;
+}
+
+.field label{
+
+    display:block;
+
+    margin-bottom:6px;
+
+    font-weight:bold;
+}
+
+.field input{
+
+    width:100%;
+
+    height:55px;
+
+    border:none;
+
+    border-radius:10px;
+
+    text-align:center;
+
+    font-size:22px;
+}
+
+.buttons{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(160px,1fr));
+
+    gap:10px;
+
+    margin-top:15px;
+}
+
+button{
+
+    border:none;
+
+    border-radius:15px;
+
+    height:70px;
+
+    color:white;
+
+    font-weight:bold;
+
+    font-size:clamp(18px,3vw,28px);
+
+    cursor:pointer;
+}
+
+.start{
+    background:#00aa33;
+}
+
+.stop{
+    background:#dd2222;
+}
+
+.reset{
+    background:#0066ff;
+}
+
+.display{
+
+    margin-top:20px;
+
+    background:black;
+
+    border:4px solid gold;
+
+    border-radius:20px;
+
+    min-height:220px;
+
+    padding:15px;
+}
+
+#numbers{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(70px,1fr));
+
+    gap:12px;
+}
+
+.ball{
+
+    width:100%;
+    aspect-ratio:1;
+
+    border-radius:50%;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    color:white;
+
+    font-weight:bold;
+
+    font-size:clamp(22px,4vw,34px);
+
+    box-shadow:0 0 10px rgba(255,255,255,.5);
+}
+
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+<div class="machine">
+
+<h1>🎰 スロットマシン 🎰</h1>
+
+<div class="row">
+
+<div class="field">
+<label>数字の数</label>
+<input id="count" type="number" value="3" min="1">
+</div>
+
+<div class="field">
+<label>最小値</label>
+<input id="min" type="number" value="0">
+</div>
+
+<div class="field">
+<label>最大値</label>
+<input id="max" type="number" value="40">
+</div>
+
+</div>
+
+<div class="buttons">
+
+<button class="start" onclick="startSlot()">
+スタート
+</button>
+
+<button class="stop" onclick="stopSlot()">
+ストップ
+</button>
+
+<button class="reset" onclick="resetSlot()">
+リセット
+</button>
+
+</div>
+
+<div class="display">
+
+<div id="numbers"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let timer = null;
+
+const colors = [
+"#ff3333",
+"#ff8800",
+"#ffdd00",
+"#33cc33",
+"#00aaff",
+"#5555ff",
+"#aa55ff",
+"#ff44aa"
+];
+
+function getNumbers(){
+
+    const count =
+    parseInt(document.getElementById("count").value);
+
+    const min =
+    parseInt(document.getElementById("min").value);
+
+    const max =
+    parseInt(document.getElementById("max").value);
+
+    if(isNaN(count) || isNaN(min) || isNaN(max))
+        return [];
+
+    if(max < min)
+        return [];
+
+    const pool = [];
+
+    for(let i=min;i<=max;i++){
+        pool.push(i);
+    }
+
+    const result = [];
+
+    const amount =
+    Math.min(count,pool.length);
+
+    for(let i=0;i<amount;i++){
+
+        const index =
+        Math.floor(
+        Math.random()*pool.length
+        );
+
+        result.push(pool[index]);
+
+        pool.splice(index,1);
+    }
+
+    return result.sort((a,b)=>a-b);
+}
+
+function draw(numbers){
+
+    const box =
+    document.getElementById("numbers");
+
+    box.innerHTML = "";
+
+    numbers.forEach(number=>{
+
+        const div =
+        document.createElement("div");
+
+        div.className = "ball";
+
+        const color =
+        colors[
+        Math.floor(
+        Math.random()*colors.length
+        )
+        ];
+
+        div.style.background = color;
+
+        div.textContent = number;
+
+        box.appendChild(div);
+    });
+}
+
+function startSlot(){
+
+    if(timer) return;
+
+    timer = setInterval(()=>{
+
+        draw(
+        getNumbers()
+        );
+
+    },100);
+}
+
+function stopSlot(){
+
+    clearInterval(timer);
+
+    timer = null;
+
+    draw(
+    getNumbers()
+    );
+}
+
+function resetSlot(){
+
+    clearInterval(timer);
+
+    timer = null;
+
+    document.getElementById("numbers")
+    .innerHTML = "";
+}
+
+draw(getNumbers());
+
+</script>
+
+</body>
+</html>
