@@ -148,37 +148,40 @@ button{
     min-height:220px;
 
     padding:15px;
+    container-type: inline-size;
 }
 
 #numbers{
 
-    display:grid;
-
-    grid-template-columns:
-    repeat(auto-fit,minmax(70px,1fr));
-
-    gap:12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
 }
 
 .ball{
+    /* Kulki dostosowują swój rozmiar do ekranu i ilości w rzędzie */
+    flex: 1 1 clamp(70px, 22cqi, 160px);
+    max-width: 180px;
+    aspect-ratio: 1;
 
-    width:100%;
-    aspect-ratio:1;
+    border-radius: 50%;
 
-    border-radius:50%;
+    display: flex;
 
-    display:flex;
+    justify-content: center;
+    align-items: center;
 
-    justify-content:center;
-    align-items:center;
+    color: white;
 
-    color:white;
+    /* Rozmiar czcionki oparty na rozmiarze własnym kulki */
+    font-size: min(35cqi, 65px);
+    font-weight: 900;
+    line-height: 1;
 
-    font-size:clamp(20px,calc(2rem + 5vw),90px);
-    font-weight:900;
-
-
-    box-shadow:0 0 10px rgba(255,255,255,.5);
+    box-shadow: 0 0 10px rgba(255,255,255,.5);
 }
 
 </style>
@@ -251,6 +254,28 @@ const colors = [
 "#ff44aa"
 ];
 
+// Wczytywanie zapisanych ustawień z localStorage przy ładowaniu strony
+function loadSettings() {
+    const savedCount = localStorage.getItem("slot_count");
+    const savedMin = localStorage.getItem("slot_min");
+    const savedMax = localStorage.getItem("slot_max");
+
+    if (savedCount !== null) document.getElementById("count").value = savedCount;
+    if (savedMin !== null) document.getElementById("min").value = savedMin;
+    if (savedMax !== null) document.getElementById("max").value = savedMax;
+}
+
+// Zapisywanie danych przy zmianie wartości w polach input
+function saveSettings() {
+    localStorage.setItem("slot_count", document.getElementById("count").value);
+    localStorage.setItem("slot_min", document.getElementById("min").value);
+    localStorage.setItem("slot_max", document.getElementById("max").value);
+}
+
+document.getElementById("count").addEventListener("input", saveSettings);
+document.getElementById("min").addEventListener("input", saveSettings);
+document.getElementById("max").addEventListener("input", saveSettings);
+
 function getNumbers(){
 
     const count =
@@ -319,6 +344,14 @@ function draw(numbers){
 
         div.textContent = number;
 
+        // Dostosowanie czcionki dla dłuższych liczb, aby nie wystawały poza kulkę
+        const len = String(number).length;
+        if (len >= 4) {
+            div.style.fontSize = "min(20cqi, 40px)";
+        } else if (len === 3) {
+            div.style.fontSize = "min(28cqi, 50px)";
+        }
+
         box.appendChild(div);
     });
 }
@@ -357,6 +390,8 @@ function resetSlot(){
     .innerHTML = "";
 }
 
+// Inicjalizacja przy starcie strony
+loadSettings();
 draw(getNumbers());
 
 </script>
